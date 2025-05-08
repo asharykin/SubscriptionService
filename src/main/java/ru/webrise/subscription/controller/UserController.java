@@ -18,8 +18,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto userRequestDto) {
-        UserResponseDto createdUser = userService.createUser(userRequestDto);
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto requestDto) {
+        UserResponseDto createdUser = userService.createUser(requestDto);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
@@ -36,8 +36,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @RequestBody UserRequestDto userRequestDto) {
-        UserResponseDto updatedUser = userService.updateUser(id, userRequestDto);
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @RequestBody UserRequestDto requestDto) {
+        UserResponseDto updatedUser = userService.updateUser(id, requestDto);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 

@@ -18,8 +18,8 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/users/{userId}/subscriptions")
-    public ResponseEntity<UserSubscriptionDto> addSubscription(@PathVariable Long userId, @RequestBody SubscriptionRequestDto subscriptionRequestDto) {
-        UserSubscriptionDto addedSubscription = subscriptionService.addSubscription(userId, subscriptionRequestDto);
+    public ResponseEntity<UserSubscriptionDto> addSubscription(@PathVariable Long userId, @RequestBody SubscriptionRequestDto requestDto) {
+        UserSubscriptionDto addedSubscription = subscriptionService.addSubscription(userId, requestDto);
         return new ResponseEntity<>(addedSubscription, HttpStatus.CREATED);
     }
 
@@ -35,7 +35,7 @@ public class SubscriptionController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(" /subscriptions/top")
+    @GetMapping("/subscriptions/top")
     public ResponseEntity<List<SubscriptionCountDto>> getTopSubscriptions() {
         List<SubscriptionCountDto> topSubscriptions = subscriptionService.getTopSubscriptions();
         return new ResponseEntity<>(topSubscriptions, HttpStatus.OK);

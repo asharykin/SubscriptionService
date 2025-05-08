@@ -1,0 +1,35 @@
+POST /users HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{"username": "usertest", "email": "usertest@gmail.com", "password": "123456"}
+###
+GET /users HTTP/1.1
+Host: localhost:8080
+###
+GET /users/5 HTTP/1.1
+Host: localhost:8080
+###
+PUT /users/5 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{"email": "usertest@mail.ru"}
+###
+DELETE /users/5 HTTP/1.1
+Host: localhost:8080
+###
+POST /users/5/subscriptions HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{"subscriptionId": 2, "startDate": "2025-05-01", "endDate": "2025-05-31"}
+###
+GET /users/5/subscriptions HTTP/1.1
+Host: localhost:8080
+###
+DELETE /users/5/subscriptions/1 HTTP/1.1
+Host: localhost:8080
+###
+GET /subscriptions/top HTTP/1.1
+Host: localhost:8080

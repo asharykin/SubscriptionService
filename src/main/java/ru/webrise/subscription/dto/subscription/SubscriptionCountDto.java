@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SubscriptionCountDto {
-    private SubscriptionDto subscription;
+    private SubscriptionResponseDto subscription;
     private long count;
 }
 

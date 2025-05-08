@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class SubscriptionRequestDto {
-    private String serviceName;
+    private Long subscriptionId;
     private LocalDate startDate;
     private LocalDate endDate;
 }

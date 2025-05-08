@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class UserSubscriptionDto {
     private Long id;
     private UserResponseDto user;
-    private SubscriptionDto subscription;
+    private SubscriptionResponseDto subscription;
     private LocalDate startDate;
     private LocalDate endDate;
 }

@@ -1,9 +1,11 @@
 package ru.webrise.subscription.service;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.webrise.subscription.dto.user.UserRequestDto;
 import ru.webrise.subscription.dto.user.UserResponseDto;
 import ru.webrise.subscription.mapper.UserMapper;
@@ -11,55 +13,70 @@ import ru.webrise.subscription.model.User;
 import ru.webrise.subscription.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
-
-    public UserResponseDto createUser(UserRequestDto userRequestDto) {
-        User user = userMapper.userRequestDtoToUser(userRequestDto);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User savedUser = userRepository.save(user);
-        return userMapper.userToUserResponseDto(savedUser);
-    }
 
     public UserResponseDto getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " does not exist"));
         return userMapper.userToUserResponseDto(user);
-    }
-
-    public UserResponseDto updateUser(Long id, UserRequestDto userRequestDto) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
-
-        userMapper.updateUserFromUserRequestDto(userRequestDto, user);
-
-        if (userRequestDto.getPassword() != null && !userRequestDto.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
-        }
-
-        User updatedUser = userRepository.save(user);
-        return userMapper.userToUserResponseDto(updatedUser);
-    }
-
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User not found with id: " + id);
-        }
-        userRepository.deleteById(id);
     }
 
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.stream()
-                .map(userMapper::userToUserResponseDto)
-                .collect(Collectors.toList());
+        log.info("Found {} users", users.size());
+
+        Stream<UserResponseDto> dtoStream = users.stream().map(userMapper::userToUserResponseDto);
+        return dtoStream.toList();
+    }
+
+    @Transactional
+    public UserResponseDto createUser(UserRequestDto requestDto) {
+        checkUsernameAndEmail(requestDto);
+
+        User user = userMapper.userRequestDtoToUser(requestDto);
+        userRepository.save(user);
+        log.info("User created successfully with id {}", user.getId());
+
+        return userMapper.userToUserResponseDto(user);
+    }
+
+    @Transactional
+    public UserResponseDto updateUser(Long id, UserRequestDto requestDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " does not exist"));
+        checkUsernameAndEmail(requestDto);
+
+        userMapper.updateUserFromUserRequestDto(requestDto, user);
+        userRepository.save(user);
+        log.info("User with id {} updated successfully", id);
+
+        return userMapper.userToUserResponseDto(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            log.info("User with id {} deleted successfully", id);
+        }
+        throw new EntityNotFoundException("User with id " + id + " does not exist");
+    }
+
+    private void checkUsernameAndEmail(UserRequestDto requestDto) {
+        if (userRepository.existsByUsername(requestDto.getUsername())) {
+            throw new EntityExistsException("User with username '" + requestDto.getUsername() + "' already exists");
+        }
+        if (userRepository.existsByEmail(requestDto.getEmail())) {
+            throw new EntityExistsException("User with email '" + requestDto.getEmail() + "' already exists");
+        }
     }
 }
 
